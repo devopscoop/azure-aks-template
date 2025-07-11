@@ -62,4 +62,3 @@ Commit them.
 Should we be using Managed Identity instead of Service Principal?
 https://arnav.au/2023/09/08/azure-managed-identity-vs-service-principal/
 https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/guides/managed_service_identity
-

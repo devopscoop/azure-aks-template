@@ -10,6 +10,6 @@ grep -rI --exclude-dir bootstrap --exclude-dir .git --exclude-dir .terraform -E 
 tofu init -upgrade
 
 # Show new versions?
-cat .terraform/modules/modules.json | jq -r '.Modules[] | "\(.Source) \(.Version)"' | sort -u
+jq -r '.Modules[] | "\(.Source) \(.Version)"' .terraform/modules/modules.json | sort -u
 
 echo "Now open a new terminal and go manually update the versions and uncomment them..."
