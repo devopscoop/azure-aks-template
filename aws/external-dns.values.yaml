@@ -1,7 +1,0 @@
-interval: "10m"
-triggerLoopOnEvent: true
-policy: "sync"
-
-# TODO: Do we need this?
-#domainFilters:
-#  - "dev.devops.coop"
