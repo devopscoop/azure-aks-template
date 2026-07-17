@@ -4,6 +4,24 @@
 
 This deploys a Kubernetes cluster to Azure.
 
+# Install required packages
+
+This repo ships package manifests that install every CLI tool it uses (`az`, `tenv` for `tofu`, `git`, `kubectl`):
+
+- macOS, using [Homebrew](https://brew.sh/) and the `Brewfile`:
+
+  ```shell
+  brew bundle
+  ```
+
+- Arch Linux, using the `pkglist.txt`. This requires an AUR helper such as [yay](https://github.com/Jguer/yay) or [paru](https://github.com/Morganamilo/paru), because `tenv-bin` is an AUR package:
+
+  ```shell
+  grep -vE '^(#|$)' pkglist.txt | yay -S --needed -
+  ```
+
+On other operating systems, install the tools listed above manually. Do not install OpenTofu directly — tenv reads `.opentofu-version` so local runs stay locked to the same version as CI.
+
 # Bootstrapping
 
 Based on:
