@@ -55,7 +55,7 @@ jobs:
       - id: validate
         run: tofu validate -no-color
       - id: plan
-        run: tofu plan -no-color -input=false -out=plan.file
+        run: tofu plan -concise -no-color -input=false -out=plan.file
         continue-on-error: true
       - uses: actions/github-script@d746ffe35508b1917358783b479e04febd2b8f71 # v9.0.0
         if: github.event_name == 'pull_request'
@@ -65,4 +65,4 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: "const output = `#### OpenTofu Format and Style \U0001F58C\\`${{ steps.fmt.outcome }}\\`\n#### OpenTofu Initialization ⚙️\\`${{ steps.init.outcome }}\\`\n#### OpenTofu Validation \U0001F916\\`${{ steps.validate.outcome }}\\`\n<details><summary>Validation Output</summary>\n\n\\`\\`\\`\\n\n${{ steps.validate.outputs.stdout }}\n\\`\\`\\`\n\n</details>\n\n#### OpenTofu Plan \U0001F4D6\\`${{ steps.plan.outcome }}\\`\n\n<details><summary>Show Plan</summary>\n\n\\`\\`\\`\\n\n${process.env.PLAN}\n\\`\\`\\`\n\n</details>\n\n*Pusher: @${{ github.actor }}, Action: \\`${{ github.event_name }}\\`, Working Directory: \\`${{ env.tf_actions_working_dir }}\\`, Workflow: \\`${{ github.workflow }}\\`*`;\n\ngithub.rest.issues.createComment({\n  issue_number: context.issue.number,\n  owner: context.repo.owner,\n  repo: context.repo.repo,\n  body: output\n})\n"
       - if: github.ref == 'refs/heads/main'
-        run: tofu apply -no-color -input=false plan.file
+        run: tofu apply -concise -no-color -input=false plan.file
