@@ -9,14 +9,14 @@ directories) that provisions an AKS cluster and its supporting Azure resources.
 Every `.tf` file at the repo root is part of one configuration and one state
 file:
 
-| File | Contents |
-| --- | --- |
-| `main.tf` | `terraform` block (azurerm backend + provider), resource group, AKS cluster, VNet/subnet, three DNS zones |
-| `keyvault.tf` | The original `devopscoop` Key Vault + `sops` key. **Obsolete** — see landmines |
+| File               | Contents                                                                                                                               |
+| ------------------ | -------------------------------------------------------------------------------------------------------------------------------------- |
+| `main.tf`          | `terraform` block (azurerm backend + provider), resource group, AKS cluster, VNet/subnet, three DNS zones                              |
+| `keyvault.tf`      | The original `devopscoop` Key Vault + `sops` key. **Obsolete** — see landmines                                                         |
 | `keyvault-argo.tf` | The in-use `devopscoop-argocd` Key Vault, `sops-key`, Argo CD user-assigned identity, access policy, and federated identity credential |
-| `backups.tf` | Data protection backup vault + disk backup policy |
-| `imports.tf` | `import {}` blocks adopting pre-existing Argo CD resources |
-| `variables.tf` | `node_count` (default 1) — the only variable in the repo |
+| `backups.tf`       | Data protection backup vault + disk backup policy                                                                                      |
+| `imports.tf`       | `import {}` blocks adopting pre-existing Argo CD resources                                                                             |
+| `variables.tf`     | `node_count` (default 1) — the only variable in the repo                                                                               |
 
 Resource names are hard-coded to `devopscoop` throughout, and the region is
 hard-coded to West US 2. Despite the repo name, forking this as a "template"
@@ -25,7 +25,7 @@ means renaming resources by hand rather than setting variables.
 ## Commands
 
 OpenTofu is invoked as `tofu`, never `terraform`. It is installed and pinned by
-tenv, which reads `.opentofu-version` (currently 1.10.5) so local runs match CI:
+tenv, which reads `.opentofu-version` (currently 1.12.6) so local runs match CI:
 
 ```shell
 tenv tofu install          # installs the version in .opentofu-version
@@ -90,10 +90,11 @@ These are non-obvious and cost real time if rediscovered:
 - **`temporary_name_for_rotation = "wtfazure"`** in the default node pool is
   load-bearing: AKS requires it to change most other node pool settings in
   place. Don't remove it.
-- **Pinned versions with no constraints.** `kubernetes_version = "1.28.5"` is
-  hard-coded in `main.tf`, and `required_providers` declares azurerm with no
-  version constraint — the version is held only by `.terraform.lock.hcl`
-  (3.98.0).
+- **Versions are hard-coded, deliberately.** `kubernetes_version = "1.36.3"`
+  is hard-coded in `main.tf`, and `required_providers` pins azurerm to an exact
+  version (5.4.0) from `registry.opentofu.org`, so every run resolves the same
+  provider regardless of `.terraform.lock.hcl`. To upgrade, bump the pin in
+  `main.tf`, run `tofu init -upgrade`, and commit the updated lock file.
 - **Argo CD's Kubernetes service account is not managed here.** The
   `kubernetes_service_account` resource in `keyvault-argo.tf` is commented out
   because OpenTofu has no cluster credentials (chicken-and-egg). The federated
@@ -107,13 +108,9 @@ These are non-obvious and cost real time if rediscovered:
 
 Several docs and configs disagree with the code. Treat the `.tf` files as truth:
 
-- `.github/workflows/opentofu.yml` sets `tofu_version_file:
-  cluster/.opentofu-version`, but the file lives at the repo root; no `cluster/`
-  directory exists anywhere in this repo's history.
 - README.md's bootstrap section uses storage account `devopscoopopentofu`, while
   the backend in `main.tf` is `devopscoopterraform`. README links also point at
-  `devopscoop/cluster-tf`, and a comment in the workflow points at
-  `Equal-Vote/terraform`.
+  `devopscoop/cluster-tf`.
 - `.github/dependabot.yml` has an empty `package-ecosystem: ""` placeholder, so
   it updates nothing as configured.
 

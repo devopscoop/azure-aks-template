@@ -5,6 +5,11 @@ resource "azurerm_key_vault" "devopscoop-argocd" {
   sku_name            = "standard"
   tenant_id           = data.azurerm_client_config.current.tenant_id
   resource_group_name = azurerm_resource_group.devopscoop.name
+
+  # Required as of azurerm 5.x. This vault is governed by the
+  # azurerm_key_vault_access_policy resource below, not Azure RBAC, so this
+  # stays false (the pre-5.x default).
+  rbac_authorization_enabled = false
 }
 
 # This is the identity that is created by the script
@@ -97,9 +102,8 @@ resource "azurerm_key_vault_access_policy" "argocd-policy" {
 # Adds in the federated credential that was last created in Arturos script.
 # Not going to import this one as well.
 resource "azurerm_federated_identity_credential" "kubernetes-federated-credential" {
-  name                = "kubernetes-federated-credential"
-  resource_group_name = azurerm_resource_group.devopscoop.name
-  subject             = "system:serviceaccount:argocd:aks-argocd"
+  name    = "kubernetes-federated-credential"
+  subject = "system:serviceaccount:argocd:aks-argocd"
 
   # depends_on = [
   #   azurerm_key_vault.devopscoop-argocd,
@@ -107,7 +111,8 @@ resource "azurerm_federated_identity_credential" "kubernetes-federated-credentia
   # ]
 
   # Found this example that says we should be mapping to the ID and not principal_id
-  parent_id = azurerm_user_assigned_identity.argocd-identity.id
+  # (`parent_id` + `resource_group_name` before azurerm 5.x)
+  user_assigned_identity_id = azurerm_user_assigned_identity.argocd-identity.id
 
   # Found this through the docuumentation here:
   # https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/kubernetes_cluster#oidc_issuer_url
