@@ -8,7 +8,7 @@ terraform {
   required_providers {
     azurerm = {
       source  = "registry.opentofu.org/hashicorp/azurerm"
-      version = "5.4.0"
+      version = "5.14.0"
     }
   }
   backend "azurerm" {
